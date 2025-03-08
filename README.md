@@ -1,6 +1,6 @@
-Simple go restfull api application for training
+## Simple go restfull api application for training
 
-dependencies:
+### dependencies:
 - go v1.24
 - ilyakaznacheev/cleanenv v1.5.0
 - joho/godotenv v1.5.1
