@@ -32,4 +32,6 @@ func main() {
 			log.Error("Failed to close database: %v", err)
 		}
 	}(db)
+
+	// TODO: Add CRUD for books
 }
