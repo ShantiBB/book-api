@@ -1,4 +1,4 @@
-env: "local" # local, dev, prod
+env: "${PROJECT_STATUS}" # local, dev, prod
 
 storage_path: "${STORAGE_PATH}"
 
