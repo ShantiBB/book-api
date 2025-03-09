@@ -1,6 +1,6 @@
 env: "local" # local, dev, prod
 
-storage_path: "internal/storage/storage.db"
+storage_path: "/mnt/c/wsl/storage.db"
 
 http_server:
   address: "localhost"
