@@ -31,9 +31,13 @@ func CloseDB(db *sql.DB) error {
 }
 
 func SessionDB(storagePath string) (*sql.DB, error) {
-	var db *sql.DB
+	if storagePath == "" {
+		return nil, fmt.Errorf("%s: no storage path provided", op)
+	}
 
+	var db *sql.DB
 	db, err := sql.Open("sqlite", storagePath)
+
 	ok := CheckDB(db, err)
 	if ok != nil {
 		return nil, ok
