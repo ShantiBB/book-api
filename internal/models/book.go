@@ -1,9 +1,11 @@
 package models
 
+import "time"
+
 type Book struct {
-	ID          uint64 `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	CreatedAt   int    `json:"year"`
-	Author      string `json:"author"`
+	ID          int64     `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	Author      string    `json:"author"`
 }
