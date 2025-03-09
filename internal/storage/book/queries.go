@@ -1,11 +1,12 @@
 package book_query
 
 import (
-	"book/internal/models"
-	"book/internal/storage/queries"
 	"database/sql"
 	"fmt"
 	"time"
+
+	"book/internal/models"
+	"book/internal/storage/queries"
 )
 
 type BookQuery interface {

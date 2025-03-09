@@ -1,15 +1,17 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+	"strconv"
+
+	_ "modernc.org/sqlite"
+
 	"book/internal/config"
 	"book/internal/lib/sl"
 	"book/internal/models"
 	"book/internal/storage"
 	"book/internal/storage/book"
-	"log/slog"
-	_ "modernc.org/sqlite"
-	"os"
-	"strconv"
 )
 
 func main() {

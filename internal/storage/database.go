@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"book/internal/storage/queries"
 	"database/sql"
 	"fmt"
+
+	"book/internal/storage/queries"
 )
 
 const op = "storage.sqlite.Init"
