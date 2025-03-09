@@ -3,7 +3,7 @@ env: "local" # local, dev, prod
 storage_path: "/mnt/c/wsl/storage.db"
 
 http_server:
-  address: "localhost"
-  port: "8080"
+  address: "${SERVER_HOST}"
+  port: "${SERVER_PORT}"
   timeout: "4s"
   idle_timeout: "60s"
