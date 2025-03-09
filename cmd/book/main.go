@@ -1,7 +1,6 @@
 package main
 
 import (
-	book_query "book/internal/storage/book"
 	"log/slog"
 	"os"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 	"book/internal/lib/sl"
 	"book/internal/models"
 	"book/internal/storage"
+	BookQuery "book/internal/storage/book"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 		Author:      "troll",
 	}
 
-	if err = book_query.Create(&book, db); err != nil {
+	if err = BookQuery.Create(&book, db); err != nil {
 		log.Error("Error book", "error", err)
 		os.Exit(1)
 	}
