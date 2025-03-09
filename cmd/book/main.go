@@ -1,6 +1,7 @@
 package main
 
 import (
+	book_query "book/internal/storage/book"
 	"log/slog"
 	"os"
 	"strconv"
@@ -11,12 +12,10 @@ import (
 	"book/internal/lib/sl"
 	"book/internal/models"
 	"book/internal/storage"
-	"book/internal/storage/book"
 )
 
 func main() {
 	cfg := config.MustLoad()
-
 	log := sl.SetupLogger(cfg.Env)
 
 	log.Debug("Debug is true")
@@ -39,8 +38,8 @@ func main() {
 		Description: "The boy why survived",
 		Author:      "troll",
 	}
-	err = book_query.Create(&book, db)
-	if err != nil {
+
+	if err = book_query.Create(&book, db); err != nil {
 		log.Error("Error book", "error", err)
 		os.Exit(1)
 	}
@@ -50,11 +49,11 @@ func main() {
 		slog.String("title", book.Title),
 	)
 
-	// TODO: Add CRUD for books
 	defer func() {
 		if err := storage.CloseDB(db); err != nil {
 			log.Error("Failed to close database", err)
 		}
 		log.Info("Database closed successfully")
 	}()
+	// TODO: Add CRUD for books
 }
