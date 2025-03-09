@@ -11,7 +11,7 @@ import (
 	"book/internal/lib/sl"
 	"book/internal/models"
 	"book/internal/storage"
-	BookQuery "book/internal/storage/book"
+	bookQuery "book/internal/storage/book"
 )
 
 func main() {
@@ -31,29 +31,52 @@ func main() {
 		log.Error("Failed to initialize database", err)
 		os.Exit(1)
 	}
-	log.Info("Database initialized successfully")
+	log.Debug("Database initialized successfully")
 
 	book := models.Book{
 		Title:       "harry potter",
 		Description: "The boy why survived",
-		Author:      "troll",
+		Author:      "Troll",
 	}
 
-	if err = BookQuery.Create(&book, db); err != nil {
-		log.Error("Error book", "error", err)
+	if err = bookQuery.Create(&book, db); err != nil {
+		log.Error("Error book", err)
 		os.Exit(1)
 	}
-	log.Info(
+	log.Debug(
 		"Book created successfully",
 		slog.String("id", strconv.FormatInt(book.ID, 10)),
 		slog.String("title", book.Title),
 	)
 
+	var bookByID string
+	bookByID, err = bookQuery.Retrieve(book.ID, db)
+	if err != nil {
+		log.Error("Error retrieving book", err)
+		os.Exit(1)
+	}
+	log.Debug("Book retrieved successfully", slog.String("title", bookByID))
+
+	books, err := bookQuery.RetrieveAll(db)
+	if err != nil {
+		log.Error("Error retrieving books", err)
+		os.Exit(1)
+	}
+
+	for _, b := range books {
+		log.Debug(
+			"Book retrieved successfully",
+			slog.String("id", strconv.FormatInt(b.ID, 10)),
+			slog.String("title", b.Title),
+			slog.String("author", b.Author),
+		)
+	}
+
 	defer func() {
 		if err := storage.CloseDB(db); err != nil {
 			log.Error("Failed to close database", err)
 		}
-		log.Info("Database closed successfully")
+		log.Debug("Database closed successfully")
 	}()
 	// TODO: Add CRUD for books
 }
