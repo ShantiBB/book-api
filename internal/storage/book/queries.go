@@ -11,22 +11,44 @@ import (
 )
 
 type BookQuery interface {
-	RetrieveAll()
-	Retrieve()
-	Create()
-	Update()
-	Delete()
+	Create(book *models.Book) error
+	Retrieve(id int64) (string, error)
+	RetrieveAll() ([]models.Book, error)
+	Update(book *models.Book) error
+	Delete(id int64) error
 }
 
-func RetrieveAll(db *sql.DB) ([]models.Book, error) {
-	const op = "storage.sqlite.RetrieveAll"
+type SQLiteBookStorage struct {
+	DB *sql.DB
+}
 
-	stmt, err := db.Prepare(queries.GetBooks)
+func (s *SQLiteBookStorage) Create(book *models.Book) error {
+	const op = "storage.sqlite.Create"
+
+	res, err := s.DB.Exec(queries.CreateBook, book.Title, book.Description, book.Author)
 	if err != nil {
-		return nil, fmt.Errorf("%s: failed to prepare books query - %s", op, err)
+		return fmt.Errorf("%s: failed to execute book query - %w", op, err)
 	}
 
-	rows, err := stmt.Query()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("%s: failed to get last insert ID - %w", op, err)
+	}
+
+	var createdAt time.Time
+	if err := s.DB.QueryRow(queries.GetCreatedAtBook, id).Scan(&createdAt); err != nil {
+		return fmt.Errorf("%s: failed to get created time - %w", op, err)
+	}
+
+	book.ID = id
+	book.CreatedAt = createdAt
+	return nil
+}
+
+func (s *SQLiteBookStorage) RetrieveAll() ([]models.Book, error) {
+	const op = "storage.sqlite.RetrieveAll"
+
+	rows, err := s.DB.Query(queries.GetBooks)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to execute books query - %s", op, err)
 	}
@@ -49,64 +71,55 @@ func RetrieveAll(db *sql.DB) ([]models.Book, error) {
 	return books, nil
 }
 
-func Retrieve(id int64, db *sql.DB) (string, error) {
+func (s *SQLiteBookStorage) Retrieve(id int64) (string, error) {
 	const op = "storage.sqlite.Retrieve"
-
-	stmt, err := db.Prepare(queries.GetBookByID)
-	if err != nil {
-		return "", fmt.Errorf("%s: failed to prepare book query - %s", op, err)
-	}
-
 	var res string
-	err = stmt.QueryRow(id).Scan(&res)
 
+	err := s.DB.QueryRow(queries.GetBookByID, id).Scan(&res)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", fmt.Errorf("%s: book is not  found - %s", op, err)
+		return "", fmt.Errorf("%s: book not found - %s", op, err)
 	}
 	if err != nil {
-		return "", fmt.Errorf("%s: execute statement %w", op, err)
+		return "", fmt.Errorf("%s: failed to fetch book %w", op, err)
 	}
 
 	return res, nil
 }
 
-func Create(book *models.Book, db *sql.DB) error {
-	const op = "storage.sqlite.Create"
+func (s *SQLiteBookStorage) Update(b *models.Book) error {
+	const op = "storage.sqlite.Update"
 
-	stmt, err := db.Prepare(queries.CreateBook)
+	res, err := s.DB.Exec(queries.UpdateBookByID, &b.Title, &b.Description, &b.ID)
 	if err != nil {
-		return fmt.Errorf("%s: failed to prepare book query - %w", op, err)
+		return fmt.Errorf("%s: failed to execute query - %w", op, err)
 	}
 
-	var result sql.Result
-	result, err = stmt.Exec(book.Title, book.Description, book.Author)
+	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("%s: failed to execute book query - %w", op, err)
+		return fmt.Errorf("%s: failed to get rows affected - %w", op, err)
 	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return fmt.Errorf("%s: failed to get last insert ID - %w", op, err)
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: no rows updated", op)
 	}
-
-	row := db.QueryRow(queries.GetCreatedAtBook, id)
-	var createdAt time.Time
-	if err := row.Scan(&createdAt); err != nil {
-		return fmt.Errorf("%s: failed to fetch created_at - %w", op, err)
-	}
-
-	book.ID = id
-	book.CreatedAt = createdAt
 
 	return nil
 }
 
-func Update(dbPath string, pk int) (BookQuery, error) {
-	const op = "storage.sqlite.Update"
-	return nil, nil
-}
-
-func Delete(dbPath string, pk int) (BookQuery, error) {
+func (s *SQLiteBookStorage) Delete(id int64) error {
 	const op = "storage.sqlite.Delete"
-	return nil, nil
+
+	res, err := s.DB.Exec(queries.DeleteBook, id)
+	if err != nil {
+		return fmt.Errorf("%s: failed to execute book query - %s", op, err)
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: failed to get rows affected - %w", op, err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: no rows deleted, book with id %d not found", op, id)
+	}
+
+	return nil
 }

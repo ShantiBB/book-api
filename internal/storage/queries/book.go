@@ -19,3 +19,7 @@ const GetCreatedAtBook = `SELECT created_at FROM book WHERE id = ?`
 const GetBooks = `SELECT * FROM book`
 
 const GetBookByID = `SELECT title FROM book WHERE id = ?`
+
+const UpdateBookByID = `UPDATE book SET title = ?, description = ? WHERE id = ?`
+
+const DeleteBook = `DELETE FROM book WHERE id = ?`

@@ -33,13 +33,15 @@ func main() {
 	}
 	log.Debug("Database initialized successfully")
 
+	bookStorage := bookQuery.SQLiteBookStorage{DB: db}
+
 	book := models.Book{
 		Title:       "harry potter",
 		Description: "The boy why survived",
 		Author:      "Troll",
 	}
 
-	if err = bookQuery.Create(&book, db); err != nil {
+	if err = bookStorage.Create(&book); err != nil {
 		log.Error("Error book", err)
 		os.Exit(1)
 	}
@@ -50,14 +52,14 @@ func main() {
 	)
 
 	var bookByID string
-	bookByID, err = bookQuery.Retrieve(book.ID, db)
+	bookByID, err = bookStorage.Retrieve(book.ID)
 	if err != nil {
 		log.Error("Error retrieving book", err)
 		os.Exit(1)
 	}
 	log.Debug("Book retrieved successfully", slog.String("title", bookByID))
 
-	books, err := bookQuery.RetrieveAll(db)
+	books, err := bookStorage.RetrieveAll()
 	if err != nil {
 		log.Error("Error retrieving books", err)
 		os.Exit(1)
@@ -72,11 +74,30 @@ func main() {
 		)
 	}
 
+	newBook := models.Book{
+		ID:          book.ID,
+		Title:       "new title",
+		Description: "new description",
+		Author:      book.Author,
+	}
+
+	err = bookStorage.Update(&newBook)
+	if err != nil {
+		log.Error("Error updating book", err)
+	}
+
+	log.Debug("Book updated successfully")
+
+	err = bookStorage.Delete(book.ID)
+	if err != nil {
+		log.Error("Error deleting book", err)
+	}
+	log.Debug("Book deleted successfully")
+
 	defer func() {
 		if err := storage.CloseDB(db); err != nil {
 			log.Error("Failed to close database", err)
 		}
 		log.Debug("Database closed successfully")
 	}()
-	// TODO: Add CRUD for books
 }
