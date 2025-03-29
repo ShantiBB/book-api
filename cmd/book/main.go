@@ -27,14 +27,12 @@ func main() {
 	}
 	log.Debug("Database initialized successfully")
 
+	router := gin.Default()
+
 	bookStorage := &bookQuery.SQLiteBookStorage{DB: db}
 	handler := routers.NewHandler(bookStorage)
 
-	router := gin.Default()
-	router.POST("/books", handler.CreateBook)
-	router.GET("/books", handler.GetAllBooks)
-	router.GET("/books/:id", handler.GetBookByID)
-	router.DELETE("/books/:id", handler.DeleteBookByID)
+	routers.BookRoutes(router, handler)
 
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPServer.Address, cfg.HTTPServer.Port)
 	if err := router.Run(addr); err != nil {
