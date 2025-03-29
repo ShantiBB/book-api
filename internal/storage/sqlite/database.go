@@ -1,9 +1,10 @@
 package sqlite
 
 import (
-	"book/internal/storage/book"
 	"database/sql"
 	"fmt"
+
+	"book/internal/storage/book"
 )
 
 const op = "storage.sqlite.Init"

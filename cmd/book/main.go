@@ -1,16 +1,17 @@
 package main
 
 import (
-	"book/api/routers"
-	bookQuery "book/internal/storage/book"
-	"book/internal/storage/sqlite"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	_ "modernc.org/sqlite"
 	"os"
 
+	"github.com/gin-gonic/gin"
+	_ "modernc.org/sqlite"
+
+	"book/api/routers"
 	"book/internal/config"
 	"book/internal/lib/sl"
+	bookQuery "book/internal/storage/book"
+	"book/internal/storage/sqlite"
 )
 
 func main() {
