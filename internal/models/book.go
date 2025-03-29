@@ -9,3 +9,10 @@ type Book struct {
 	CreatedAt   time.Time `json:"created_at"`
 	Author      string    `json:"author"`
 }
+
+type UpdateBookRequest struct {
+	ID          int64  `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Author      string `json:"author"`
+}

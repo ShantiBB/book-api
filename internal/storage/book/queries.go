@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"book/internal/models"
-	"book/internal/storage/queries"
 )
 
 type BookQuery interface {
 	Create(book *models.Book) error
-	Retrieve(id int64) (string, error)
+	Retrieve(id *int) (*models.Book, error)
 	RetrieveAll() ([]models.Book, error)
-	Update(book *models.Book) error
-	Delete(id int64) error
+	Update(book *models.UpdateBookRequest) error
+	Delete(id *int) error
 }
 
 type SQLiteBookStorage struct {
@@ -25,7 +24,7 @@ type SQLiteBookStorage struct {
 func (s *SQLiteBookStorage) Create(book *models.Book) error {
 	const op = "storage.sqlite.Create"
 
-	res, err := s.DB.Exec(queries.CreateBook, book.Title, book.Description, book.Author)
+	res, err := s.DB.Exec(CreateBook, book.Title, book.Description, book.Author)
 	if err != nil {
 		return fmt.Errorf("%s: failed to execute book query - %w", op, err)
 	}
@@ -36,7 +35,7 @@ func (s *SQLiteBookStorage) Create(book *models.Book) error {
 	}
 
 	var createdAt time.Time
-	if err := s.DB.QueryRow(queries.GetCreatedAtBook, id).Scan(&createdAt); err != nil {
+	if err := s.DB.QueryRow(GetCreatedAtBook, id).Scan(&createdAt); err != nil {
 		return fmt.Errorf("%s: failed to get created time - %w", op, err)
 	}
 
@@ -48,7 +47,7 @@ func (s *SQLiteBookStorage) Create(book *models.Book) error {
 func (s *SQLiteBookStorage) RetrieveAll() ([]models.Book, error) {
 	const op = "storage.sqlite.RetrieveAll"
 
-	rows, err := s.DB.Query(queries.GetBooks)
+	rows, err := s.DB.Query(GetBooks)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to execute books query - %s", op, err)
 	}
@@ -71,25 +70,27 @@ func (s *SQLiteBookStorage) RetrieveAll() ([]models.Book, error) {
 	return books, nil
 }
 
-func (s *SQLiteBookStorage) Retrieve(id int64) (string, error) {
+func (s *SQLiteBookStorage) Retrieve(id *int) (*models.Book, error) {
 	const op = "storage.sqlite.Retrieve"
-	var res string
+	var book models.Book
 
-	err := s.DB.QueryRow(queries.GetBookByID, id).Scan(&res)
+	err := s.DB.QueryRow(GetBookByID, *id).Scan(
+		&book.ID, &book.Title, &book.Description, &book.Author, &book.CreatedAt,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", fmt.Errorf("%s: book not found - %s", op, err)
+		return nil, fmt.Errorf("%s: book not found - %s", op, err)
 	}
 	if err != nil {
-		return "", fmt.Errorf("%s: failed to fetch book %w", op, err)
+		return nil, fmt.Errorf("%s: failed to fetch book %w", op, err)
 	}
 
-	return res, nil
+	return &book, nil
 }
 
-func (s *SQLiteBookStorage) Update(b *models.Book) error {
+func (s *SQLiteBookStorage) Update(b *models.UpdateBookRequest) error {
 	const op = "storage.sqlite.Update"
 
-	res, err := s.DB.Exec(queries.UpdateBookByID, &b.Title, &b.Description, &b.ID)
+	res, err := s.DB.Exec(UpdateBookByID, &b.Title, &b.Description, &b.ID)
 	if err != nil {
 		return fmt.Errorf("%s: failed to execute query - %w", op, err)
 	}
@@ -105,10 +106,10 @@ func (s *SQLiteBookStorage) Update(b *models.Book) error {
 	return nil
 }
 
-func (s *SQLiteBookStorage) Delete(id int64) error {
+func (s *SQLiteBookStorage) Delete(id *int) error {
 	const op = "storage.sqlite.Delete"
 
-	res, err := s.DB.Exec(queries.DeleteBook, id)
+	res, err := s.DB.Exec(DeleteBook, id)
 	if err != nil {
 		return fmt.Errorf("%s: failed to execute book query - %s", op, err)
 	}

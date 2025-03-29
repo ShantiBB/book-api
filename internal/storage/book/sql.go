@@ -1,4 +1,4 @@
-package queries
+package book_query
 
 const CreateBookTable = `
 	CREATE TABLE IF NOT EXISTS book (
@@ -18,7 +18,11 @@ const GetCreatedAtBook = `SELECT created_at FROM book WHERE id = ?`
 
 const GetBooks = `SELECT * FROM book`
 
-const GetBookByID = `SELECT title FROM book WHERE id = ?`
+const GetBookByID = `
+	SELECT id, title, description, author, created_at 
+	FROM book 
+	WHERE id = ?
+`
 
 const UpdateBookByID = `UPDATE book SET title = ?, description = ? WHERE id = ?`
 

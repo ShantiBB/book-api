@@ -1,10 +1,9 @@
-package storage
+package sqlite
 
 import (
+	"book/internal/storage/book"
 	"database/sql"
 	"fmt"
-
-	"book/internal/storage/queries"
 )
 
 const op = "storage.sqlite.Init"
@@ -43,7 +42,7 @@ func SessionDB(storagePath string) (*sql.DB, error) {
 		return nil, ok
 	}
 
-	stmt, err := db.Prepare(queries.CreateBookTable)
+	stmt, err := db.Prepare(book_query.CreateBookTable)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to prepare book table query - %w", op, err)
 	}
