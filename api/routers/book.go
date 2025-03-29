@@ -1,10 +1,11 @@
 package routers
 
 import (
-	"book/internal/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"book/internal/models"
 )
 
 func (h *Handler) CreateBook(c *gin.Context) {
