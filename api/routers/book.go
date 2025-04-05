@@ -20,13 +20,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id":          book.ID,
-		"title":       book.Title,
-		"description": book.Description,
-		"author":      book.Author,
-		"created_at":  book.CreatedAt,
-	})
+	c.JSON(http.StatusCreated, book)
 }
 
 func (h *Handler) GetAllBooks(c *gin.Context) {
@@ -81,13 +75,9 @@ func (h *Handler) UpdateBookByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update book"})
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{
-		"id":          book.ID,
-		"title":       updateBook.Title,
-		"description": updateBook.Description,
-		"author":      book.Author,
-		"created_at":  book.CreatedAt,
-	})
+	book.Title = updateBook.Title
+	book.Description = updateBook.Description
+	c.JSON(http.StatusAccepted, book)
 }
 
 func (h *Handler) DeleteBookByID(c *gin.Context) {
@@ -101,5 +91,5 @@ func (h *Handler) DeleteBookByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete book"})
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{})
+	c.JSON(http.StatusNoContent, nil)
 }
