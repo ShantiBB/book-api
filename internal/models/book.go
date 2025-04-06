@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Book struct {
 	ID          int64     `json:"id"`

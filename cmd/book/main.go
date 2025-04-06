@@ -1,17 +1,19 @@
 package main
 
 import (
+	"book/internal/models"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	_ "modernc.org/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"book/api/routers"
 	"book/internal/config"
 	"book/internal/lib/sl"
 	bookQuery "book/internal/storage/book"
-	"book/internal/storage/sqlite"
 )
 
 func main() {
@@ -19,13 +21,25 @@ func main() {
 	log := sl.SetupLogger(cfg.Env)
 
 	log.Debug("Debug is true")
+	log.Debug("Using storage path: %s", cfg.StoragePath)
+	storageDir := filepath.Dir(cfg.StoragePath)
+	if err := os.MkdirAll(storageDir, os.ModePerm); err != nil {
+		log.Error("Failed to create storage directory", err)
+		os.Exit(1)
+	}
 
-	db, err := sqlite.SessionDB(cfg.StoragePath)
+	db, err := gorm.Open(sqlite.Open(cfg.StoragePath))
 	if err != nil {
 		log.Error("Failed to initialize database", err)
 		os.Exit(1)
 	}
 	log.Debug("Database initialized successfully")
+
+	err = db.AutoMigrate(&models.Book{})
+	if err != nil {
+		log.Error("Failed to migrate database", err)
+		return
+	}
 
 	router := gin.Default()
 

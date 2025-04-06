@@ -1,12 +1,21 @@
 package routers
 
 import (
+	bookQuery "book/internal/storage/book"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"book/internal/models"
 )
+
+type Handler struct {
+	bookStorage bookQuery.BookQuery
+}
+
+func NewHandler(bookStorage bookQuery.BookQuery) *Handler {
+	return &Handler{bookStorage: bookStorage}
+}
 
 func (h *Handler) CreateBook(c *gin.Context) {
 	var book models.Book
