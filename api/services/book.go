@@ -1,12 +1,13 @@
-package routers
+package services
 
 import (
-	bookQuery "book/internal/storage/book"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"book/api/utils"
 	"book/internal/models"
+	bookQuery "book/internal/storage/book"
 )
 
 type Handler struct {
@@ -43,7 +44,7 @@ func (h *Handler) GetAllBooks(c *gin.Context) {
 
 func (h *Handler) GetBookByID(c *gin.Context) {
 	strID := c.Param("id")
-	id, err := parseStringID(strID)
+	id, err := utils.ParseStringID(strID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
@@ -60,7 +61,7 @@ func (h *Handler) GetBookByID(c *gin.Context) {
 
 func (h *Handler) UpdateBookByID(c *gin.Context) {
 	strID := c.Param("id")
-	id, err := parseStringID(strID)
+	id, err := utils.ParseStringID(strID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 	}
@@ -91,7 +92,7 @@ func (h *Handler) UpdateBookByID(c *gin.Context) {
 
 func (h *Handler) DeleteBookByID(c *gin.Context) {
 	strID := c.Param("id")
-	id, err := parseStringID(strID)
+	id, err := utils.ParseStringID(strID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 	}

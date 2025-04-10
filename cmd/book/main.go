@@ -1,7 +1,6 @@
 package main
 
 import (
-	"book/internal/models"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,8 +10,10 @@ import (
 	"gorm.io/gorm"
 
 	"book/api/routers"
+	"book/api/services"
 	"book/internal/config"
 	"book/internal/lib/sl"
+	"book/internal/models"
 	bookQuery "book/internal/storage/book"
 )
 
@@ -44,7 +45,7 @@ func main() {
 	router := gin.Default()
 
 	bookStorage := &bookQuery.SQLiteBookStorage{DB: db}
-	handler := routers.NewHandler(bookStorage)
+	handler := services.NewHandler(bookStorage)
 
 	routers.BookRoutes(router, handler)
 

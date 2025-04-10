@@ -1,10 +1,10 @@
-package routers
+package utils
 
 import (
 	"strconv"
 )
 
-func parseStringID(strID string) (*int, error) {
+func ParseStringID(strID string) (*int, error) {
 	id, err := strconv.Atoi(strID)
 	if err != nil {
 		return nil, err
