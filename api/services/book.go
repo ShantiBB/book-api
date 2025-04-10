@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"book/api/utils"
 	"book/internal/models"
 	bookQuery "book/internal/storage/book"
+	"book/internal/utils"
 )
 
 type Handler struct {
