@@ -1,9 +1,0 @@
-env: "${PROJECT_STATUS}" # local, dev, prod
-
-storage_path: "${STORAGE_PATH}"
-
-http_server:
-  address: "${SERVER_HOST}"
-  port: "${SERVER_PORT}"
-  timeout: "4s"
-  idle_timeout: "60s"
