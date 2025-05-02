@@ -7,15 +7,16 @@ import (
 )
 
 type Service struct {
-	DB   *pgxpool.Pool
-	Log  *slog.Logger
-	Repo Repository
+	db   *pgxpool.Pool
+	log  *slog.Logger
+	repo Repository
+}
+
+type Repository interface {
+	BookRepository
+	GenreRepository
 }
 
 func New(db *pgxpool.Pool, log *slog.Logger, repo Repository) *Service {
-	return &Service{
-		DB:   db,
-		Log:  log,
-		Repo: repo,
-	}
+	return &Service{db, log, repo}
 }

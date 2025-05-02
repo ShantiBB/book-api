@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	bookHandler "testSQLC/internal/http/handler"
-	router "testSQLC/internal/http/router/chi"
-	bookRepo "testSQLC/internal/repository/postgres"
-	bookService "testSQLC/internal/service"
-	"testSQLC/internal/storage/postgres"
+	"book-api/internal/http/handler"
+	router "book-api/internal/http/router/chi"
+	repository "book-api/internal/repository/postgres"
+	"book-api/internal/service"
+	"book-api/internal/storage/postgres"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -40,16 +40,17 @@ func main() {
 		log.Info("success close database")
 	}()
 
-	bookSvc := bookService.New(db, log, bookRepo.New(db))
-	bookHdlr := bookHandler.New(db, log, bookSvc)
+	postgresRepos := repository.New(db)
+	services := service.New(db, log, postgresRepos)
+	handlers := handler.New(db, log, services)
 
-	r := chi.NewRouter()
-	router.New(r, bookHdlr)
+	chiRouter := chi.NewRouter()
+	router.New(chiRouter, handlers)
 
 	log.Info("start server", "address", "localhost:8080")
 	server := &http.Server{
 		Addr:         "localhost:8080",
-		Handler:      r,
+		Handler:      chiRouter,
 		ReadTimeout:  4 * time.Second,
 		WriteTimeout: 4 * time.Second,
 		IdleTimeout:  60 * time.Second,

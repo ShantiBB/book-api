@@ -5,26 +5,26 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strconv"
 
-	bookEntity "testSQLC/internal/entity"
-	"testSQLC/internal/schema/request"
-	"testSQLC/internal/schema/response"
+	"book-api/internal/entity"
+	"book-api/internal/http/schema/request"
+	"book-api/internal/http/schema/response"
+	"book-api/internal/http/utils"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 )
 
-type Service interface {
-	Create(ctx context.Context, b *bookEntity.CreateBook) error
-	GetByID(ctx context.Context, id int64) (*bookEntity.Book, error)
-	GetAll(ctx context.Context) ([]*bookEntity.Book, error)
-	UpdateByID(ctx context.Context, b *bookEntity.UpdateBook) (*bookEntity.UpdateBook, error)
-	DeleteByID(ctx context.Context, id int64) error
+type BookService interface {
+	CreateBook(ctx context.Context, b *entity.CreateBook) error
+	GetBookByID(ctx context.Context, id int64) (*entity.Book, error)
+	GetAllBooks(ctx context.Context) ([]*entity.Book, error)
+	UpdateBookByID(ctx context.Context, b *entity.UpdateBook) (*entity.UpdateBook, error)
+	DeleteBookByID(ctx context.Context, id int64) error
 }
 
-func (h *Handler) Create() http.HandlerFunc {
+func (h *Handler) CreateBook() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req request.Book
 
@@ -40,42 +40,32 @@ func (h *Handler) Create() http.HandlerFunc {
 			return
 		}
 
-		book := &bookEntity.CreateBook{
+		book := &entity.CreateBook{
 			Title:       req.Title,
 			Description: req.Description,
 			Author:      req.Author,
 			GenreIDs:    req.Genres,
 		}
 
-		if err := h.svc.Create(r.Context(), book); err != nil {
+		if err := h.svc.CreateBook(r.Context(), book); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, response.Error("failed to create book"))
 			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		render.JSON(w, r, response.Book{
-			ID:          book.ID,
-			Title:       book.Title,
-			Description: book.Description,
-			Author:      book.Author,
-			Genres:      book.GenreIDs,
-		})
+		render.JSON(w, r, book)
 	}
 }
 
-func (h *Handler) GetByID() http.HandlerFunc {
+func (h *Handler) GetBookByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		strID := chi.URLParam(r, "id")
-
-		id, err := strconv.Atoi(strID)
+		id, err := utils.ParseID(w, r, chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, response.Error("invalid id"))
 			return
 		}
 
-		book, err := h.svc.GetByID(r.Context(), int64(id))
+		book, err := h.svc.GetBookByID(r.Context(), id)
 
 		if errors.Is(err, sql.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
@@ -94,9 +84,9 @@ func (h *Handler) GetByID() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) GetAll() http.HandlerFunc {
+func (h *Handler) GetBookAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		books, err := h.svc.GetAll(r.Context())
+		books, err := h.svc.GetAllBooks(r.Context())
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, response.Error("failed to get books"))
@@ -108,14 +98,10 @@ func (h *Handler) GetAll() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) UpdateByID() http.HandlerFunc {
+func (h *Handler) UpdateBookByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		strID := chi.URLParam(r, "id")
-
-		id, err := strconv.Atoi(strID)
+		id, err := utils.ParseID(w, r, chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, response.Error("invalid id"))
 			return
 		}
 
@@ -132,15 +118,15 @@ func (h *Handler) UpdateByID() http.HandlerFunc {
 			return
 		}
 
-		book := &bookEntity.UpdateBook{
-			ID:          int64(id),
+		book := &entity.UpdateBook{
+			ID:          id,
 			Title:       req.Title,
 			Description: req.Description,
 			Author:      req.Author,
 			GenreIDs:    req.Genres,
 		}
 
-		book, err = h.svc.UpdateByID(r.Context(), book)
+		book, err = h.svc.UpdateBookByID(r.Context(), book)
 		if errors.Is(err, sql.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
 			render.JSON(w, r, response.Error("book not found"))
@@ -154,28 +140,18 @@ func (h *Handler) UpdateByID() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		render.JSON(w, r, response.Book{
-			ID:          int64(id),
-			Title:       book.Title,
-			Description: book.Description,
-			Author:      book.Author,
-			Genres:      book.GenreIDs,
-		})
+		render.JSON(w, r, book)
 	}
 }
 
-func (h *Handler) DeleteByID() http.HandlerFunc {
+func (h *Handler) DeleteBookByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		strID := chi.URLParam(r, "id")
-
-		id, err := strconv.Atoi(strID)
+		id, err := utils.ParseID(w, r, chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, response.Error("invalid id"))
 			return
 		}
 
-		if err = h.svc.DeleteByID(r.Context(), int64(id)); err != nil {
+		if err = h.svc.DeleteBookByID(r.Context(), id); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				w.WriteHeader(http.StatusNotFound)
 				render.JSON(w, r, response.Error("book not found"))

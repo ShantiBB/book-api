@@ -1,40 +1,68 @@
 package service
 
-//type Repository interface {
-//	Create(g *genreEntity.Genre) (*genreEntity.Genre, error)
-//	GetByID(id int64) (*genreEntity.Genre, error)
-//	GetAll() ([]*genreEntity.Genre, error)
-//	DeleteByID(id int64) error
-//}
-//
-//type Service struct {
-//	DB   *sql.DB
-//	Log  *slog.Logger
-//	Repo Repository
-//}
-//
-//func New(db *sql.DB, log *slog.Logger, repo Repository) *Service {
-//	return &Service{
-//		DB:   db,
-//		Log:  log,
-//		Repo: repo,
-//	}
-//}
-//
-//func (s *Service) Create(g *genreEntity.Genre) (*genreEntity.Genre, error) {
-//	const op = "genre.service.CreateBook"
-//
-//	genre, err := s.Repo.Create(g)
-//	if err != nil {
-//		s.Log.Error("failed to create genre", "op", op, "error", err)
-//		return nil, err
-//	}
-//
-//	s.Log.Info(
-//		"create genre",
-//		"id", genre.ID,
-//		"name", genre.Name,
-//	)
-//
-//	return genre, nil
-//}
+import (
+	"context"
+
+	"book-api/internal/entity"
+)
+
+type GenreRepository interface {
+	CreateGenre(ctx context.Context, g *entity.Genre) (*entity.Genre, error)
+	GetGenreByID(ctx context.Context, id int64) (*entity.Genre, error)
+	GetAllGenres(ctx context.Context) ([]*entity.Genre, error)
+	DeleteGenreByID(ctx context.Context, id int64) error
+}
+
+func (s *Service) CreateGenre(ctx context.Context, g *entity.Genre) error {
+	const op = "genre.service.Create"
+
+	genre, err := s.repo.CreateGenre(ctx, g)
+	if err != nil {
+		s.log.Error("failed", "op", op, "error", err)
+		return err
+	}
+
+	s.log.Info("success", "op", op, "id", genre.ID)
+
+	return nil
+}
+
+func (s *Service) GetGenreByID(ctx context.Context, id int64) (*entity.Genre, error) {
+	const op = "genre.service.GetByID"
+
+	genre, err := s.repo.GetGenreByID(ctx, id)
+	if err != nil {
+		s.log.Error("failed to get book by id", "op", op, "error", err)
+		return nil, err
+	}
+
+	s.log.Debug("success", "op", op, "id", genre.ID)
+
+	return genre, nil
+}
+
+func (s *Service) GetAllGenres(ctx context.Context) ([]*entity.Genre, error) {
+	const op = "genre.service.GetAll"
+
+	genres, err := s.repo.GetAllGenres(ctx)
+	if err != nil {
+		s.log.Error("failed to get all books", "op", op, "error", err)
+		return nil, err
+	}
+
+	s.log.Debug("success", "op", op, "count", len(genres))
+	return genres, nil
+}
+
+func (s *Service) DeleteGenreByID(ctx context.Context, id int64) error {
+	const op = "genre.service.DeleteByID"
+
+	if err := s.repo.DeleteGenreByID(ctx, id); err != nil {
+		s.log.Error("failed to delete book", "op", op, "error", err)
+		return err
+	}
+
+	s.log.Debug("success", "op", op, "id", id)
+
+	return nil
+}

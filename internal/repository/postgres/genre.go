@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"testSQLC/internal/entity"
+	"book-api/internal/entity"
 )
 
 func (r *Repository) CreateGenre(ctx context.Context, g *entity.Genre) (*entity.Genre, error) {

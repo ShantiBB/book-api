@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"testSQLC/internal/entity"
+	"book-api/internal/entity"
 )
 
 func (r *Repository) AddGenres(ctx context.Context, tx pgx.Tx, id int64, genres []int64) error {

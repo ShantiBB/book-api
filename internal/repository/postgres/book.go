@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"testSQLC/internal/entity"
+	"book-api/internal/entity"
 
 	"github.com/jackc/pgx/v5"
 )

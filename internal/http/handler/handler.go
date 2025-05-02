@@ -12,10 +12,11 @@ type Handler struct {
 	svc Service
 }
 
+type Service interface {
+	BookService
+	GenreService
+}
+
 func New(db *pgxpool.Pool, log *slog.Logger, svc Service) *Handler {
-	return &Handler{
-		db:  db,
-		log: log,
-		svc: svc,
-	}
+	return &Handler{db, log, svc}
 }
